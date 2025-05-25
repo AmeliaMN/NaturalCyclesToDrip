@@ -1,7 +1,5 @@
 # Natural Cycles to Drip
 
-[Drip](https://dripapp.org) is an open source menstrual cycle tracking app. It stores data directly on your device rather than in the cloud. In their [FAQ](https://dripapp.org/faq.html) they link data converters for people switching from Flo and Clue, but nothing was available for Natural Cycles. I converted my own data, and am providing the code here. This code does not convert all the variables that could possibly be exported from Natural Cycles, just the ones I personally used. 
-
 
 ``` r
 library(tidyverse)
@@ -42,7 +40,11 @@ drip <- Daily_Entries |>
     pain.backache = str_detect(`Data Flag`, "PAIN_BACKACHE"),
     pain.nausea = str_detect(`Data Flag`, "PAIN_NAUSEOUS")
   ) |>
-  select(-Menstruation, -`Data Flag`)
+  select(-Menstruation, -`Data Flag`) |>
+  mutate(temperature.value = case_when(
+    temperature.value > 40 ~ round(((temperature.value - 32) * 5) / 9, digits = 2),
+    TRUE ~ temperature.value
+  )) # Temperature should be in C, not F
 
 drip <- bind_rows(drip_format, drip)
 ```
